@@ -1,1 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kya Karu Tu Acchi Lagti Hai</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #ff0000, #330000);
+      color: white;
+      overflow: hidden;
+    }
+    h1 {
+      margin-top: 10px;
+      font-size: 26px;
+    }
+    .logo {
+      width: 100px;
+      margin: 20px auto;
+      animation: spin 4s linear infinite;
+    }
+    @keyframes spin {
+      from {transform: rotate(0deg);}
+      to {transform: rotate(360deg);}
+    }
+    .lyrics {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+      min-height: 100px;
+    }
+    .active {
+      background: linear-gradient(90deg, #ff4d4d, #ff0000);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0px 0px 15px #ff4d4d;
+    }
+    iframe {
+      margin-top: 15px;
+      border-radius: 10px;
+    }
+    .qr-section {
+      margin-top: 30px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #ff3333;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #cc0000;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Kya Karu Tu Acchi Lagti Hai 🎵</h1>
+
+  <!-- Spinning logo -->
+  <img src="https://img.icons8.com/ios-filled/100/ffffff/musical-notes.png" class="logo" alt="Music Logo">
+
+  <!-- YouTube embed -->
+  <iframe id="ytplayer" width="300" height="180"
+    src="https://www.youtube.com/embed/iObNqGTR1Lw?enablejsapi=1"
+    frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+  <!-- Lyrics -->
+  <div class="lyrics" id="lyrics-box">Loading lyrics...</div>
+
+  <!-- QR Code -->
+  <div class="qr-section">
+    <h3>Scan QR to open this page</h3>
+    <img id="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://xtvdadil-crypto.github.io/song-lyrics-site/" alt="QR Code">
+    <br>
+    <button onclick="downloadQR()">Download QR Code</button>
+  </div>
+
+  <script>
+    // Lyrics with timing (example sync)
+    const lyrics = [
+      { time: 0, text: "Kya karu tu acchi lagti hai..." },
+      { time: 5, text: "Dil mein bas jaati hai..." },
+      { time: 10, text: "Teri baaton mein kuch khaas baat hai..." },
+      { time: 16, text: "Tere saath hi rehna chahta hoon main..." },
+      { time: 22, text: "Dhichak Dhoom 🎶" }
+    ];
+
+    const box = document.getElementById("lyrics-box");
+    let currentLine = 0;
+
+    // Start synced lyrics
+    function startLyrics() {
+      const interval = setInterval(() => {
+        if (currentLine < lyrics.length) {
+          box.innerHTML = `<span class="active">${lyrics[currentLine].text}</span>`;
+          currentLine++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 5000); // adjust timing if needed
+    }
+
+    // Auto-start lyrics after page load
+    window.onload = startLyrics;
+
+    // QR download
+    function downloadQR() {
+      const link = document.createElement("a");
+      link.href = document.getElementById("qr").src;
+      link.download = "site-qr.png";
+      link.click();
+    }
+  </script>
+
+</body>
+</html>
 
