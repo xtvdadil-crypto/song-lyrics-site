@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kya Karu Tu Acchi Lagti Hai</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 32px;
+      color: #ff4d6d;
+    }
+    .logo {
+      width: 80px;
+      animation: spin 6s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .lyrics {
+      margin-top: 20px;
+      font-size: 36px;
+      font-weight: bold;
+      background: linear-gradient(90deg, #ff4d6d, #ff0000);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      opacity: 0.3;
+      transition: opacity 0.5s;
+    }
+    .lyrics.active {
+      opacity: 1;
+      text-shadow: 0 0 10px #ff4d6d;
+    }
+    .qr-btn {
+      margin-top: 20px;
+      background: #ff4d6d;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎵 Kya Karu Tu Acchi Lagti Hai</h1>
+  <img src="https://cdn-icons-png.flaticon.com/512/727/727218.png" class="logo" alt="Music Logo">
+
+  <audio id="song" controls autoplay>
+    <source src="song_trimmed.mp3" type="audio/mp3">
+    Your browser does not support audio.
+  </audio>
+
+  <div id="lyrics-box">
+    <p class="lyrics" data-time="X">kya karu acchi tu lagti hai</p>
+    <p class="lyrics" data-time="Y">baat ye jhooti kyu lagti hai</p>
+    <p class="lyrics" data-time="Z">arre jab tu bhadakti hai</p>
+    <p class="lyrics" data-time="W">dil pe chale goliya, haye</p>
+    <p class="lyrics" data-time="V">dhichkyao doom doom doom doom</p>
+    <p class="lyrics" data-time="U">dhichkyao doom doom doom doom</p>
+    <p class="lyrics" data-time="T">mai aur tum tum tum</p>
+  </div>
+
+  <button class="qr-btn" onclick="downloadQR()">📥 Download QR Code</button>
+
+  <script>
+    const audio = document.getElementById("song");
+    const lyrics = document.querySelectorAll(".lyrics");
+
+    audio.ontimeupdate = () => {
+      const t = audio.currentTime;
+      lyrics.forEach(line => {
+        const start = parseFloat(line.dataset.time);
+        if (t >= start && t < start + 3) {
+          line.classList.add("active");
+        } else {
+          line.classList.remove("active");
+        }
+      });
+    };
+
+    function downloadQR() {
+      const url = encodeURIComponent("https://xtvdadil-crypto.github.io/song-lyrics-site/");
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${url}`;
+      const a = document.createElement("a");
+      a.href = qrUrl;
+      a.download = "lyrics-site-qr.png";
+      a.click();
+    }
+  </script>
+
+</body>
+</html>
