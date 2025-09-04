@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Dhichkyaaon — synced lyrics</title>
+<link rel="icon" href="data:,"/>
+<style>
+  :root{
+    --bg1:#2b0000; --bg2:#ff4d4d; --accent:#ffb3c6;
+  }
+  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:linear-gradient(135deg,var(--bg1),#330000);color:#fff}
+  .wrap{max-width:900px;margin:24px auto;padding:12px;display:grid;grid-template-columns:1fr;gap:12px;align-items:center}
+  header{text-align:center}
+  h1{margin:6px 0;font-size:22px;color:#ffd6dd}
+  /* small spinning logo */
+  .logo{width:64px;height:64px;display:block;margin:8px auto;border-radius:12px;animation:spin 5s linear infinite;filter:drop-shadow(0 6px 18px rgba(0,0,0,.6))}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  /* audio */
+  .player{display:flex;justify-content:center;margin:6px 0}
+  audio{width:92%;max-width:720px;border-radius:12px}
+  /* lyrics large gradient text */
+  .lyrics-box{display:flex;align-items:center;justify-content:center;height:260px;max-width:920px;margin:0 auto;background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.25));border-radius:16px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .lyric{
+    font-size:34px;
+    font-weight:800;
+    line-height:1.05;
+    text-align:center;
+    max-width:92%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    background-image:linear-gradient(90deg,#ff8080,#ff2d55 50%,#ff7b9a);
+    color:transparent;
+    opacity:.16; transition:opacity .22s ease, transform .22s ease, text-shadow .22s;
+    transform:scale(.98);
+  }
+  .lyric.active{opacity:1;transform:scale(1);text-shadow:0 6px 30px rgba(255,77,109,.35)}
+  /* floating comment bubble */
+  .comment{
+    position:fixed;right:18px;bottom:120px;background:#fff;color:#111;padding:10px 12px;border-radius:22px;box-shadow:0 12px 30px rgba(0,0,0,.35);font-weight:700;cursor:pointer;z-index:60;
+    display:flex;gap:8px;align-items:center
+  }
+  .comment small{font-weight:600;color:#ff2d55}
+  .comment .dot{width:8px;height:8px;background:#ff2d55;border-radius:50%}
+  /* QR area */
+  .qr-row{display:flex;gap:12px;justify-content:center;align-items:center; flex-wrap:wrap}
+  .btn{background:linear-gradient(90deg,#ff416c,#ff4b2b);color:#fff;border:none;padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer}
+  .muted{color:rgba(255,255,255,.6);font-size:13px}
+  /* modal for source code */
+  .modal{position:fixed;inset:0;display:none;place-items:center;background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6));z-index:100}
+  .card{width:95%;max-width:900px;background:#0e0e10;color:#eaeaea;border-radius:12px;padding:12px;box-shadow:0 30px 80px rgba(0,0,0,.7)}
+  pre{white-space:pre-wrap;word-break:break-word;background:#080808;padding:12px;border-radius:8px;overflow:auto;max-height:60vh}
+  .card .close{float:right;background:transparent;border:0;color:#f8f8f8;font-weight:800;cursor:pointer;font-size:18px}
+  /* responsive */
+  @media(max-width:520px){ .lyric{font-size:22px} .logo{width:56px;height:56px} .comment{right:12px;bottom:100px} .player audio{width:100%} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img class="logo" src="https://cdn-icons-png.flaticon.com/512/727/727240.png" alt="logo">
+      <h1>Dhichkyaaon — Kya Karu Tu Acchi Lagti Hai</h1>
+      <div class="muted">Small spinning logo • gradient lyrics • tappable “cute source code” comment</div>
+    </header>
+
+    <div class="player">
+      <!-- use the trimmed mp3 you uploaded earlier -->
+      <audio id="audio" controls preload="auto">
+        <source src="song_trimmed.mp3" type="audio/mpeg">
+        Your browser doesn't support audio.
+      </audio>
+    </div>
+
+    <div class="lyrics-box" aria-live="polite">
+      <!-- single big line that updates; accessible -->
+      <div id="lyricText" class="lyric">Loading…</div>
+    </div>
+
+    <div style="text-align:center;margin-top:8px" class="qr-row">
+      <button class="btn" id="downloadQR">Download QR</button>
+      <button class="btn" id="copyLink">Copy Page Link</button>
+      <div class="muted" id="siteLink" style="margin-left:8px">https://xtvdadil-crypto.github.io/song-lyrics-site/</div>
+    </div>
+  </div>
+
+  <!-- floating comment bubble like Instagram comment -->
+  <div class="comment" id="commentBubble" title="Tap to view source code">
+    <div class="dot"></div>
+    <div>
+      <div style="font-size:14px">cute</div>
+      <small>source code</small>
+    </div>
+  </div>
+
+  <!-- modal that shows page source (so people can copy) -->
+  <div class="modal" id="modal">
+    <div class="card" role="dialog" aria-modal="true">
+      <button class="close" id="closeModal">✕</button>
+      <h3 style="margin:0 0 8px 0">Page source — copy & paste</h3>
+      <pre id="sourcePre">&lt;!-- source will appear here --&gt;</pre>
+      <div style="text-align:right;margin-top:8px">
+        <button class="btn" id="copyCode">Copy Code</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*
+  READY-TO-USE QUICKEDIT HTML
+  - Put this file and song_trimmed.mp3 together in QuickEdit folder
+  - Open index.html in your mobile browser
+  - To fine-tune sync: edit the timestamps in lyricsData below (seconds)
+*/
+
+const lyricsData = [
+  // Replace these times with exact start seconds (we will auto-detect approximate ones if you want)
+  // Example lines covering from "kya karu acchi tu lagti hai" → "dhichak doom"
+  { t: 0.00, text: "kya karu acchi tu lagti hai" },
+  { t: 4.20, text: "baat ye jhooti kyu lagti hai" },
+  { t: 8.25, text: "arre jab tu bhadakti hai" },
+  { t: 12.10, text: "dil pe chale goliya, haye" },
+  { t: 15.40, text: "dhichkyao doom doom doom doom" },
+  { t: 18.20, text: "dhichkyao doom doom doom doom" },
+  { t: 21.00, text: "mai aur tum tum tum" },
+  { t: 23.00, text: "dhichkyao doom doom doom" }
+];
+
+const audio = document.getElementById('audio');
+const lyricText = document.getElementById('lyricText');
+
+// Keep track of the last active index to avoid re-rendering
+let lastIdx = -1;
+
+function updateLyric(now){
+  // find the last lyric whose time <= now
+  let idx = -1;
+  for(let i=0;i<lyricsData.length;i++){
+    if(now >= lyricsData[i].t) idx = i;
+    else break;
+  }
+  if(idx !== lastIdx){
+    lastIdx = idx;
+    if(idx === -1) lyricText.textContent = '';
+    else lyricText.textContent = lyricsData[idx].text;
+    // add active animation class
+    lyricText.classList.remove('active');
+    void lyricText.offsetWidth; // force reflow
+    if(idx !== -1) lyricText.classList.add('active');
+  }
+}
+
+// update on timeupdate
+audio.addEventListener('timeupdate', ()=> updateLyric(audio.currentTime));
+
+// When audio loads, optionally center to first lyric
+audio.addEventListener('play', ()=> updateLyric(audio.currentTime));
+
+// QR generation + download (uses api.qrserver)
+document.getElementById('downloadQR').addEventListener('click', ()=>{
+  const link = 'https://xtvdadil-crypto.github.io/song-lyrics-site/';
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(link)}&ecc=H`;
+  // create temporary link to download
+  const a = document.createElement('a');
+  a.href = qrUrl;
+  a.download = 'site_qr.png';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+});
+
+// Copy page link
+document.getElementById('copyLink').addEventListener('click', async ()=>{
+  const link = 'https://xtvdadil-crypto.github.io/song-lyrics-site/';
+  try{
+    await navigator.clipboard.writeText(link);
+    alert('Link copied to clipboard');
+  }catch(e){
+    prompt('Copy this link', link);
+  }
+});
+
+// comment bubble opens modal with page source
+const modal = document.getElementById('modal');
+const comment = document.getElementById('commentBubble');
+const closeModal = document.getElementById('closeModal');
+const sourcePre = document.getElementById('sourcePre');
+const copyCode = document.getElementById('copyCode');
+
+comment.addEventListener('click', async ()=>{
+  // assemble a simple source snippet user can copy (not entire file to keep small)
+  const src = `<!-- Quick template: put this HTML in index.html and the song file (song_trimmed.mp3) beside it -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Dhichkyaaon</title></head>
+<body>
+  <audio src="song_trimmed.mp3" controls></audio>
+  <!-- Lyrics and CSS here... -->
+</body></html>`;
+  sourcePre.textContent = src;
+  modal.style.display = 'grid';
+});
+closeModal.addEventListener('click', ()=> modal.style.display='none');
+copyCode.addEventListener('click', async ()=>{
+  try{
+    await navigator.clipboard.writeText(sourcePre.textContent);
+    alert('Source copied');
+  }catch(e){ prompt('Copy source', sourcePre.textContent); }
+});
+
+// optional: allow tapping lyric to jump audio to that line
+lyricText.addEventListener('click', ()=>{
+  if(lastIdx >= 0) audio.currentTime = Math.max(0, lyricsData[lastIdx].t);
+});
+</script>
+</body>
+</html>
